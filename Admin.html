@@ -4,59 +4,118 @@
   <title>Nexus Pro Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
-    body { font-family: sans-serif; padding: 20px; background: #f8fafc; }
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f8fafc;
+    }
+
     h1 { color: #0f172a; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; background: white; }
-    th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; }
-    th { background: #f1f5f9; font-weight: 600; }
-    #usersList { margin-top: 16px; }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 20px;
+      background: white;
+    }
+
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 12px;
+      text-align: left;
+    }
+
+    th {
+      background: #f1f5f9;
+      font-weight: 600;
+    }
+
+    #usersList {
+      margin-top: 16px;
+    }
+
+    .error {
+      color: red;
+      font-weight: bold;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-
-  <h1>Nexus Pro Admin Panel</h1>
-  <h3>All Members</h3>
-  <div id="usersList">Loading members from Supabase...</div>
-
+<h1>Nexus Pro Admin Panel</h1>
+<h3>All Members</h3>
+<div id="usersList">Checking access...</div>
 <script>
-  const supabaseUrl = 'https://ifndfvvxxazhbvsssvtv.supabase.co'
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmbmRmdnZ4eGF6aGJ2c3NzdnR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMTY2MTYsImV4cCI6MjA5MTg5MjYxNn0.qrF9vxAEV4UiU-sr1o824ZYRIq33UQqpuLzKO4Vo1m0'
-  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
+  // 🔐 SIMPLE PASSWORD PROTECTION
+  const adminPassword = "1234"; // change this
+  const entered = prompt("Enter Admin Password:");
+
+  if (entered !== adminPassword) {
+    document.body.innerHTML = "<h2>Access Denied</h2>";
+    throw new Error("Unauthorized");
+  }
+
+  // ✅ Supabase setup
+  const supabaseUrl = 'https://ifndfvvxxazhbvsssvtv.supabase.co';
+  const supabaseKey = 'YOUR_ANON_KEY_HERE';
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
   async function loadUsers() {
+    document.getElementById('usersList').innerHTML = "Loading members...";
+
     const { data, error } = await supabase
       .from('members')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false });
 
     if (error) {
-      document.getElementById('usersList').innerHTML = 'Error: ' + error.message
-      console.error(error)
-      return
+      document.getElementById('usersList').innerHTML =
+        "<div class='error'>Error: " + error.message + "</div>";
+      console.error(error);
+      return;
     }
 
     if (!data || data.length === 0) {
-      document.getElementById('usersList').innerHTML = 'No members yet. Test signup on your Nexus app first.'
-      return
+      document.getElementById('usersList').innerHTML =
+        "No members yet. Add users from your app.";
+      return;
     }
 
-    let html = '<table><tr><th>Username</th><th>Balance</th><th>Commission</th><th>Referral</th><th>Joined</th></tr>'
+    let html = `
+      <table>
+        <tr>
+          <th>Username</th>
+          <th>Balance</th>
+          <th>Commission</th>
+          <th>Referral</th>
+          <th>Joined</th>
+        </tr>
+    `;
+
     data.forEach(user => {
-      html += `<tr>
-        <td>${user.username}</td>
-        <td>${user.balance}</td>
-        <td>${user.commission_earned}</td>
-        <td>${user.referred_by || 'None'}</td>
-        <td>${new Date(user.created_at).toLocaleDateString()}</td>
-      </tr>`
-    })
-    html += '</table>'
-    
-    document.getElementById('usersList').innerHTML = html
+      html += `
+        <tr>
+          <td>${user.username || '-'}</td>
+          <td>${user.balance ?? 0}</td>
+          <td>${user.commission_earned ?? 0}</td>
+          <td>${user.referred_by || 'None'}</td>
+          <td>${user.created_at ? new Date(user.created_at).toLocaleDateString() : '-'}</td>
+        </tr>
+      `;
+    });
+
+    html += "</table>";
+
+    document.getElementById('usersList').innerHTML = html;
   }
 
-  loadUsers()
+  // 🔄 Load immediately
+  loadUsers();
+
+  // 🔁 Auto refresh every 5 seconds
+  setInterval(loadUsers, 5000);
+
 </script>
 </body>
 </html>
+:::
