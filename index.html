@@ -251,10 +251,15 @@ Deno.cron("daily-returns", "0 0 * * *", async () => {
 <div class="auth-form" id="registerForm">
   <p style="color: #64748b; margin-bottom: 20px;">New to Nexus Pro? Create account</p>
   <div class="input-group">
-    <label for="regName">Choose Username</label>
-    <input type="text" id="regName" placeholder="Create a username">
-  </div>
-  <button class="btn" onclick="registeruser()">Register</button>
+  <label for="regUsername">Choose Username</label>
+  <input type="text" id="regUsername" placeholder="Create a username">
+</div>
+<div class="input-group">
+  <label for="regPassword">Choose Password</label>
+  <input type="password" id="regPassword" placeholder="Create a password">
+</div>
+<div id="registerError" class="error hidden"></div>
+<button class="btn" onclick="registerUser()">Register</button>
   <div id="msg"></div>
 </div>
 </div>
