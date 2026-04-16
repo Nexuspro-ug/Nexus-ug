@@ -1,93 +1,47 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Nexus Pro Admin</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0"></script>
-  <style>
-    body { font-family: Arial; padding: 20px; max-width: 600px; margin: auto; }
-    button { padding: 10px 20px; background: #000; color: white; border: none; border-radius: 5px; margin: 5px; }
-    .member { padding: 12px; background: #f2f2f2; margin: 8px 0; border-radius: 5px; display: flex; justify-content: space-between; }
-    input { padding: 8px; margin: 5px; width: 45%; }
-  </style>
+  <title>Admin Panel</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<script>
-alert('Step 1: Page loaded');
-let pass = prompt("Admin Password:");
-if (pass !== "nexus123") { document.body.innerHTML = "Access Denied"; }
-alert('Step 2: Password OK');
-</script>
-
-<h1>Nexus Pro Admin</h1>
-<input id="nameInput" placeholder="Member name">
-<input id="balanceInput" type="number" placeholder="Starting balance" value="0">
-<button onclick="addMember()">Add Member</button>
-<button onclick="addDailyReturns()">Give 10% to All</button>
-<div id="members">Loading...</div>
+  <h1>Nexus Admin Panel</h1>
+  <h2>All Members</h2>
+  <div id="usersList">Loading users...</div>
 
 <script>
-alert('Step 3: Starting Supabase');
-const SUPABASE_URL = 'https://ifndfvvxxazhbvsssvtv.supabase.co'
-const SUPABASE_KEY = 'sb_publishable_9KWRZ03ES_a7PUpeopmV9g_z8RIbEl9'
-alert('Step 4: Keys set');
+  const supabaseUrl = 'https://ifndfvvxxazhbvsssvtv.supabase.co'
+  const supabaseKey = 'sb_publishable_9KWRZ03ES_a7PUpeopmV9g_z8RIbEl9'
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
 
-let supabase;
-try {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  alert('Step 5: Client created');
-} catch(e) {
-  alert('FAILED at createClient: ' + e.message);
-}
+  async function loadUsers() {
+    const { data, error } = await supabase
+      .from('members')
+      .select('*')
+      .order('created_at', { ascending: false })
 
-async function showMembers(){
-  alert('Step 6: showMembers started');
-  try {
-    const { data: members, error } = await supabase.from('members').select().order('created_at');
-    alert('Step 7: Query finished');
-    
     if (error) {
-      document.getElementById('members').innerHTML = `ERROR: ${error.message}`;
-      return;
+      document.getElementById('usersList').innerHTML = 'Error: ' + error.message
+      return
     }
+
+    let html = '<table border="1"><tr><th>Username</th><th>Balance</th><th>Commission</th><th>Referral</th><th>Joined</th></tr>'
+    data.forEach(user => {
+      html += `<tr>
+        <td>${user.username}</td>
+        <td>${user.balance}</td>
+        <td>${user.commission_earned}</td>
+        <td>${user.referred_by || 'None'}</td>
+        <td>${new Date(user.created_at).toLocaleDateString()}</td>
+      </tr>`
+    })
+    html += '</table>'
     
-    if (!members || members.length === 0) {
-      document.getElementById('members').innerHTML = 'No members yet';
-      return;
-    }
-    
-    document.getElementById('members').innerHTML = members.map(m => 
-      `<div class="member"><span>${m.name}</span><span><b>UGX ${Number(m.balance).toFixed(2)}</b></span></div>`
-    ).join('');
-    
-  } catch (e) {
-    document.getElementById('members').innerHTML = `CRASH: ${e.message}`;
+    document.getElementById('usersList').innerHTML = html
   }
-}
 
-async function addMember(){
-  const name = document.getElementById('nameInput').value;
-  const balance = Number(document.getElementById('balanceInput').value);
-  if (!name) return alert('Enter name');
-  await supabase.from('members').insert([{ name: name, balance: balance }]);
-  document.getElementById('nameInput').value = '';
-  document.getElementById('balanceInput').value = '0';
-  showMembers();
-}
-
-async function addDailyReturns(){
-  if (!confirm('Add 10% to ALL members?')) return;
-  const { data: members } = await supabase.from('members').select();
-  for (const member of members) {
-    const newBalance = member.balance * 1.10;
-    await supabase.from('members').update({ balance: newBalance }).eq('id', member.id);
-  }
-  showMembers();
-}
-
-showMembers();
+  loadUsers()
 </script>
-
 </body>
 </html>
