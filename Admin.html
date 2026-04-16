@@ -47,16 +47,28 @@ async function addDailyReturns(){
     const newBalance = member.balance * 1.10;
     await supabase.from('members').update({ balance: newBalance }).eq('id', member.id);
   }
-  showMembers();
+  async function showMembers(){
+  try {
+    const { data: members, error } = await supabase.from('members').select().order('created_at');
+    
+    if (error) {
+      document.getElementById('members').innerHTML = `ERROR: ${error.message}`;
+      return;
+    }
+    
+    if (!members || members.length === 0) {
+      document.getElementById('members').innerHTML = 'No members yet';
+      return;
+    }
+    
+    document.getElementById('members').innerHTML = members.map(m => 
+      `<div class="member"><span>${m.name}</span><span><b>UGX ${Number(m.balance).toFixed(2)}</b></span></div>`
+    ).join('');
+    
+  } catch (e) {
+    document.getElementById('members').innerHTML = `CRASH: ${e.message}`;
+  }
 }
-
-async function showMembers(){
-  const { data: members } = await supabase.from('members').select().order('created_at');
-  document.getElementById('members').innerHTML = members.map(m => 
-    `<div class="member"><span>${m.name}</span><span><b>UGX ${Number(m.balance).toFixed(2)}</b></span></div>`
-  ).join('') || 'No members yet';
-}
-showMembers();
 </script>
 
 </body>
