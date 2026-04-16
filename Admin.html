@@ -26,28 +26,11 @@ if (pass !== "nexus123") { document.body.innerHTML = "Access Denied"; }
 <div id="members">Loading...</div>
 
 <script>
-const SUPABASE_ANON_URL = 'https://ifndfvvxxazhbvsssvtv.supabase.co'
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmbmRmdnZ4eGF6aGJ2c3NzdnR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMTY2MTYsImV4cCI6MjA5MTg5MjYxNn0.qrF9vxAEV4UiU-sr1o824ZYRIq33UQqpuLzKO4Vo1m0'
+const SUPABASE_URL = 'https://ifndfvvxxazhbvsssvtv.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmbmRmdnZ4eGF6aGJ2c3NzdnR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMTY2MTYsImV4cCI6MjA5MTg5MjYxNn0.qrF9vxAEV4UiU-sr1o824ZYRIq33UQqpuLzKO4Vo1m0'
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-async function addMember(){
-  const name = document.getElementById('nameInput').value;
-  const balance = Number(document.getElementById('balanceInput').value);
-  if (!name) return alert('Enter name');
-  await supabase.from('members').insert([{ name: name, balance: balance }]);
-  document.getElementById('nameInput').value = '';
-  document.getElementById('balanceInput').value = '0';
-  showMembers();
-}
-
-async function addDailyReturns(){
-  if (!confirm('Add 10% to ALL members?')) return;
-  const { data: members } = await supabase.from('members').select();
-  for (const member of members) {
-    const newBalance = member.balance * 1.10;
-    await supabase.from('members').update({ balance: newBalance }).eq('id', member.id);
-  }
-  async function showMembers(){
+async function showMembers(){
   try {
     const { data: members, error } = await supabase.from('members').select().order('created_at');
     
@@ -69,6 +52,28 @@ async function addDailyReturns(){
     document.getElementById('members').innerHTML = `CRASH: ${e.message}`;
   }
 }
+
+async function addMember(){
+  const name = document.getElementById('nameInput').value;
+  const balance = Number(document.getElementById('balanceInput').value);
+  if (!name) return alert('Enter name');
+  await supabase.from('members').insert([{ name: name, balance: balance }]);
+  document.getElementById('nameInput').value = '';
+  document.getElementById('balanceInput').value = '0';
+  showMembers();
+}
+
+async function addDailyReturns(){
+  if (!confirm('Add 10% to ALL members?')) return;
+  const { data: members } = await supabase.from('members').select();
+  for (const member of members) {
+    const newBalance = member.balance * 1.10;
+    await supabase.from('members').update({ balance: newBalance }).eq('id', member.id);
+  }
+  showMembers();
+}
+
+showMembers();
 </script>
 
 </body>
