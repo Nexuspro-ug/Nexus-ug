@@ -206,17 +206,6 @@
 .profit-table tr:last-child td { border-bottom: none; }
 .profit-table.highlight { color: #16a34a; font-weight: 600; }
 
-// This runs on Supabase servers daily at 00:00 UTC
-Deno.cron("daily-returns", "0 0 * * *", async () => {
-  const { data: users } = await supabase.from('members').select();
-  
-  for (const user of users) {
-    const newBalance = user.balance * 1.10; // +10%
-    await supabase.from('members')
-      .update({ balance: newBalance })
-      .eq('id', user.id);
-  }
-});
 
     </style>
 </head>
