@@ -3,7 +3,7 @@
 <head>
   <title>Nexus Pro Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0"></script>
   <style>
     body { font-family: Arial; padding: 20px; max-width: 600px; margin: auto; }
     button { padding: 10px 20px; background: #000; color: white; border: none; border-radius: 5px; margin: 5px; }
@@ -14,8 +14,10 @@
 <body>
 
 <script>
+alert('Step 1: Page loaded');
 let pass = prompt("Admin Password:");
 if (pass !== "nexus123") { document.body.innerHTML = "Access Denied"; }
+alert('Step 2: Password OK');
 </script>
 
 <h1>Nexus Pro Admin</h1>
@@ -26,13 +28,24 @@ if (pass !== "nexus123") { document.body.innerHTML = "Access Denied"; }
 <div id="members">Loading...</div>
 
 <script>
+alert('Step 3: Starting Supabase');
 const SUPABASE_URL = 'https://ifndfvvxxazhbvsssvtv.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_9KWRZ03ES_a7PUpeopmV9g_z8RIbEl9'
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+alert('Step 4: Keys set');
+
+let supabase;
+try {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  alert('Step 5: Client created');
+} catch(e) {
+  alert('FAILED at createClient: ' + e.message);
+}
 
 async function showMembers(){
+  alert('Step 6: showMembers started');
   try {
     const { data: members, error } = await supabase.from('members').select().order('created_at');
+    alert('Step 7: Query finished');
     
     if (error) {
       document.getElementById('members').innerHTML = `ERROR: ${error.message}`;
