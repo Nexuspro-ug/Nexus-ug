@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Nexus Pro Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body { font-family: Arial; padding: 20px; max-width: 600px; margin: auto; }
+    button { padding: 10px 20px; background: #000; color: white; border: none; border-radius: 5px; margin: 5px; }
+    .member { padding: 12px; background: #f2f2f2; margin: 8px 0; border-radius: 5px; display: flex; justify-content: space-between; }
+    input { padding: 8px; margin: 5px; width: 45%; }
+  </style>
+</head>
+<body>
+
+<script>
+let pass = prompt("Admin Password:");
+if (pass !== "nexus123") { document.body.innerHTML = "Access Denied"; }
+</script>
+
+<h1>Nexus Pro Admin</h1>
+<input id="nameInput" placeholder="Member name">
+<input id="balanceInput" type="number" placeholder="Starting balance" value="0">
+<button onclick="addMember()">Add Member</button>
+<button onclick="addDailyReturns()">Give 10% to All</button>
+<div id="members">Loading...</div>
+
+<script>
+consconst SUPABASE_URL = 'https://ifndfvvxxazhbvsssvtv.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmbmRmdnZ4eGF6aGJ2c3NzdnR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMTY2MTYsImV4cCI6MjA5MTg5MjYxNn0.qrF9vxAEV4UiU-sr1o824ZYRIq33UQqpuLzKO4Vo1m0'
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function addMember(){
+  const name = document.getElementById('nameInput').value;
+  const balance = Number(document.getElementById('balanceInput').value);
+  if (!name) return alert('Enter name');
+  await supabase.from('members').insert([{ name: name, balance: balance }]);
+  document.getElementById('nameInput').value = '';
+  document.getElementById('balanceInput').value = '0';
+  showMembers();
+}
+
+async function addDailyReturns(){
+  if (!confirm('Add 10% to ALL members?')) return;
+  const { data: members } = await supabase.from('members').select();
+  for (const member of members) {
+    const newBalance = member.balance * 1.10;
+    await supabase.from('members').update({ balance: newBalance }).eq('id', member.id);
+  }
+  showMembers();
+}
+
+async function showMembers(){
+  const { data: members } = await supabase.from('members').select().order('created_at');
+  document.getElementById('members').innerHTML = members.map(m => 
+    `<div class="member"><span>${m.name}</span><span><b>UGX ${Number(m.balance).toFixed(2)}</b></span></div>`
+  ).join('') || 'No members yet';
+}
+showMembers();
+</script>
+
+</body>
+</html>
