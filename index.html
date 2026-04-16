@@ -1,165 +1,808 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Nexus Pro</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f0fdf4;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Pro</title>
+    <style>
+        /* Global Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-    .box {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      width: 300px;
-      text-align: center;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
+        body {
+            background-color: #98FB98;
+            color: #1a4d2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
+        /* Login Screen Styles */
+        #login-screen {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
 
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #16a34a;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
+        #login-screen h1 {
+            color: #2E8B57;
+            margin-bottom: 10px;
+        }
 
-    button:hover {
-      background: #15803d;
-    }
+.input-group {
+            margin: 20px 0;
+            text-align: left;
+        }
 
-    .hidden { display: none; }
+.input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
 
-    .error {
-      color: red;
-      font-size: 14px;
-    }
-  </style>
+.input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+        }
+
+.error { color: #dc2626; font-size: 0.85rem; margin-top: -15px; margin-bottom: 15px; text-align: left; }
+.success { color: #16a34a; font-size: 0.85rem; margin-top: 10px; }
+.hidden { display: none!important; }
+
+.auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; }
+.auth-tab { flex: 1; padding: 10px; cursor: pointer; font-weight: 600; color: #64748b; border-bottom: 3px solid transparent; }
+.auth-tab.active { color: #2E8B57; border-bottom-color: #2E8B57; }
+.auth-form { display: none; }
+.auth-form.active { display: block; }
+
+.referral-notice { background: #fffbeb; border: 1px solid #fde68a; padding: 10px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 15px; color: #92400e; }
+
+        /* App Dashboard Styles */
+        #app-dashboard {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+            background-color: #f4fbf4;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #2E8B57;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+.dashboard-content {
+            padding: 20px 20px 6rem 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+.stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+.stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #2E8B57;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+.stat-card h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+.stat-card.value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2E8B57;
+        }
+
+.action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 20px;
+        }
+
+        /* Buttons */
+.btn {
+            background-color: #2E8B57;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+.btn:hover {
+            background-color: #1a4d2e;
+        }
+
+.btn-small {
+            width: auto;
+            padding: 8px 15px;
+            font-size: 14px;
+        }
+
+.btn-gold {
+            background-color: #f59e0b;
+            color: #1a4d2e;
+        }
+.btn-gold:hover {
+            background-color: #d97706;
+        }
+
+.btn-danger {
+            background-color: #dc2626;
+        }
+.btn-danger:hover {
+            background-color: #b91c1c;
+        }
+
+        /* Transaction list */
+.tx-list { margin-top: 10px; }
+.tx-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb; font-size: 0.9rem; }
+.tx-item:last-child { border-bottom: none; }
+.tx-credit { color: #16a34a; font-weight: 600; }
+.tx-debit { color: #dc2626; font-weight: 600; }
+
+.copy-box { background: #f1f5f9; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin: 1rem 0; }
+.copy-text { font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.tier-list { margin-top: 10px; font-size: 0.85rem; }
+.tier-item { display: flex; justify-content: space-between; padding: 6px 0; }
+
+      /* Bottom Nav */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-around; padding: 0.5rem 0; }
+.nav-item { text-align: center; padding: 0.5rem; color: #64748b; font-size: 0.75rem; cursor: pointer; }
+.nav-item.active { color: #2E8B57; font-weight: 600; }
+.nav-item div { font-size: 1.4rem; margin-bottom: 0.2rem; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+.team-section { margin-top: 1rem; }
+.team-section h4 { margin-bottom: 0.5rem; font-size: 1rem; color: #1a4d2e; }
+.team-item { display: flex; justify-content: space-between; padding: 6px 0; font-size: 0.9rem; border-bottom: 1px solid #f1f5f9; }
+.team-item:last-child { border-bottom: none; }
+
+.payment-info { background: #fffbeb; border: 1px solid #fde68a; padding: 15px; border-radius: 8px; margin: 15px 0; }
+.payment-info h5 { margin-bottom: 8px; color: #92400e; }
+.payment-row { display: flex; justify-content: space-between; margin: 5px 0; font-size: 0.9rem; }
+.payment-label { color: #78350f; }
+.payment-value { font-weight: 600; color: #92400e; }
+
+.profit-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+.profit-table th,.profit-table td { padding: 10px 8px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+.profit-table th { background: #f8fafc; color: #475569; font-size: 0.8rem; text-transform: uppercase; }
+.profit-table tr:last-child td { border-bottom: none; }
+.profit-table.highlight { color: #16a34a; font-weight: 600; }
+
+// This runs on Supabase servers daily at 00:00 UTC
+Deno.cron("daily-returns", "0 0 * * *", async () => {
+  const { data: users } = await supabase.from('members').select();
+  
+  for (const user of users) {
+    const newBalance = user.balance * 1.10; // +10%
+    await supabase.from('members')
+      .update({ balance: newBalance })
+      .eq('id', user.id);
+  }
+});
+
+    </style>
 </head>
 <body>
-<div class="box" id="authBox">
-  <h2>Nexus Pro</h2>
-  <input type="text" id="username" placeholder="Username">
-  <input type="password" id="password" placeholder="Password">
-  <div id="error" class="error"></div> 
+
+    <div id="login-screen">
+        <h1>Nexus Pro</h1>
+        <div id="referralNotice" class="referral-notice hidden">Referred by: <b id="referrerName"></b></div>
+
+        <div class="auth-tabs">
+            <div class="auth-tab active" id="loginTab" onclick="switchAuth('login')">Sign In</div>
+            <div class="auth-tab" id="registerTab" onclick="switchAuth('register')">Register</div>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div class="auth-form active" id="loginForm">
+            <p style="color: #64748b; margin-bottom: 20px;">Already registered? Sign in here</p>
+            <div class="input-group">
+                <label for="loginUsername">Username</label>
+                <input type="text" id="loginUsername" placeholder="Enter your username">
+            </div>
+            <div class="input-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password">
+            </div>
+            <div id="loginError" class="error hidden"></div>
+            <button class="btn" onclick="loginUser()">Sign In</button>
+        </div>
+<a href="https://nexuspro.ug" target="_blank">Open Nexus Pro</a>
+
+        <!-- REGISTER FORM -->
+        <div class="auth-form" id="registerForm">
+            <p style="color: #64748b; margin-bottom: 20px;">New to Nexus Pro? Create account</p>
+            <div class="input-group">
+                <label for="regUsername">Choose Username</label>
+                <input type="text" id="regUsername" placeholder="Create a username">
+            </div>
+            <div class="input-group">
+                <label for="regPassword">Choose Password</label>
+                <input type="password" id="regPassword" placeholder="Create a password">
+            </div>
+            <div id="registerError" class="error hidden"></div>
+            <button class="btn" onclick="registerUser()">Register Now</button>
+        </div>
     </div>
-<div class="box hidden" id="dashboard">
-  <h2>Welcome <span id="user"></span></h2>
-  <p>Balance: UGX <span id="balance">0</span></p>
-  <p>Commission: UGX <span id="commission">0</span></p>
-</div>
-<script>
-const supabase = window.supabase.createClient(
-  'https://ifndfvvxxazhbvsssvtv.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmbmRmdnZ4eGF6aGJ2c3NzdnR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMTY2MTYsImV4cCI6MjA5MTg5MjYxNn0.qrF9vxAEV4UiU-sr1o824ZYRIq33UQqpuLzKO4Vo1m0'
-);
 
-// REGISTER
-async function register() {
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const errorEl = document.getElementById('error');
+    <div id="app-dashboard">
+        <header>
+    <h2>Nexus Pro</h2>
+    <div>
+        <a href="https://nexuspro.ug" target="_blank" style="color:white; margin-right:15px; text-decoration:underline;"></a>
+        <button class="btn btn-small" onclick="logout()">Log Out</button>
+    </div>
+</header>
 
-  if (!username || !password) {
-    errorEl.textContent = "Enter username and password";
-    return;
-  }
+        <div class="dashboard-content">
+            <!-- TAB 1: HOME -->
+            <div class="tab-content active" id="tab-home">
+                <h2>Welcome, <span id="displayUser">User</span></h2>
+                <p style="margin-bottom: 20px; color: #555;">Your account overview</p>
 
-  // check existing
-  const { data: existing } = await supabase
-    .from('members')
-    .select('username')
-    .eq('username', username)
-    .single();
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>TOTAL BALANCE</h3>
+                        <div class="value">UGX <span id="balance">0</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>COMMISSION EARNED</h3>
+                        <div class="value">UGX <span id="commissionEarned">0</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>ACCOUNT STATUS</h3>
+                        <div class="value">Active</div>
+                    </div>
+                </div>
 
-  if (existing) {
-    errorEl.textContent = "Username already exists";
-    return;
-  }
+                <div class="stat-card">
+                    <h3>Recent Activity</h3>
+                    <div class="tx-list" id="txList">
+                        <p style="margin-top: 10px; color: #777;">No recent activity to display.</p>
+                    </div>
+                </div>
+            </div>
 
-  const { error } = await supabase
-    .from('members')
-    .insert([
-      {
-        username: username,
-        password: password,
-        balance: 4000,
-        commission_earned: 0
-      }
-    ]);
+            <!-- TAB 2: PROFIT -->
+            <div class="tab-content" id="tab-profit">
+                <h2>Profit Plans</h2>
+                <p style="margin-bottom: 20px; color: #555;">Invest and earn 10% daily for 60 days</p>
 
-  if (error) {
-    errorEl.textContent = error.message;
-    return;
-  }
+                <div class="stat-card">
+                    <h3>Income Packages</h3>
+                    <table class="profit-table">
+                        <thead>
+                            <tr>
+                                <th>Income</th>
+                                <th>Daily Return</th>
+                                <th>Days</th>
+                                <th>Total Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="profitTableBody">
+                        </tbody>
+                    </table>
+                    <p style="font-size: 0.8rem; color: #64748b; margin-top: 10px;">*Daily Return = 10% of Income. Total = Daily × 60 days</p>
+                </div>
+            </div>
 
-  alert("Registered successfully!");
-  loadUser(username);
-}
+            <!-- TAB 3: TEAM -->
+            <div class="tab-content" id="tab-team">
+                <h2>Team & Referrals</h2>
+                <p style="margin-bottom: 20px; color: #555;">Invite friends and earn from 3 levels</p>
 
-// LOGIN
-async function login() {
-  const username = document.getElementById('username').value.trim();
-  const password = document.getElementById('password').value.trim();
-  const errorEl = document.getElementById('error');
+                <div class="stat-card">
+                    <h3>Your Referral Link</h3>
+                    <div class="tier-list">
+                        <div class="tier-item"><span>Level A (Direct)</span><b>10%</b></div>
+                        <div class="tier-item"><span>Level B (2nd Gen)</span><b>4%</b></div>
+                        <div class="tier-item"><span>Level C (3rd Gen)</span><b>2%</b></div>
+                    </div>
+                    <div class="copy-box">
+                        <span class="copy-text" id="referralLink"></span>
+                        <button class="btn-small btn" style="width: auto; padding: 6px 12px;" onclick="copyReferral()">Copy</button>
+                    </div>
+                </div>
 
-  const { data, error } = await supabase
-    .from('members')
-    .select('*')
-    .eq('username', username)
-    .single();
+                <div class="stat-card">
+                    <h3>Team Overview</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>LEVEL A TEAM</h3>
+                            <div class="value" id="teamA">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>LEVEL B TEAM</h3>
+                            <div class="value" id="teamB">0</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>LEVEL C TEAM</h3>
+                            <div class="value" id="teamC">0</div>
+                        </div>
+                    </div>
+                </div>
 
-  if (error || !data) {
-    errorEl.textContent = "User not found";
-    return;
-  }
+                <div class="stat-card">
+                    <h3>Team Members</h3>
+                    <div class="team-section">
+                        <h4>Level A - Direct</h4>
+                        <div id="teamListA"><p style="color:#777;font-size:0.9rem;">No members yet</p></div>
+                    </div>
+                    <div class="team-section">
+                        <h4>Level B - 2nd Gen</h4>
+                        <div id="teamListB"><p style="color:#777;font-size:0.9rem;">No members yet</p></div>
+                    </div>
+                    <div class="team-section">
+                        <h4>Level C - 3rd Gen</h4>
+                        <div id="teamListC"><p style="color:#777;font-size:0.9rem;">No members yet</p></div>
+                    </div>
+                </div>
+            </div>
+<a href="https://chat.whatsapp.com/FOEVKMHG9hM5w0piQ9N6nP?mode=gi_t" target="_blank" class="group-btn">
+  Join WhatsApp Group
+</a>
 
-  if (data.password !== password) {
-    errorEl.textContent = "Wrong password";
-    return;
-  }
+            <!-- TAB 4: MY -->
+            <div class="tab-content" id="tab-my">
+                <h2>Wallet</h2>
+                <p style="margin-bottom: 20px; color: #555;">Recharge or withdraw your funds</p>
 
-  loadUser(username);
-}
+                <div class="stat-card">
+                    <h3>Wallet Actions</h3>
+                    <div class="action-grid">
+                        <button class="btn" onclick="showRecharge()">Recharge</button>
+                        <button class="btn btn-gold" onclick="showWithdraw()">Withdraw</button>
+                    </div>
 
-// LOAD USER
-async function loadUser(username) {
-  const { data } = await supabase
-    .from('members')
-    .select('*')
-    .eq('username', username)
-    .single();
+                    <div id="rechargeView" class="hidden">
+                        <h4>Recharge Account</h4>
 
-  document.getElementById('authBox').classList.add('hidden');
-  document.getElementById('dashboard').classList.remove('hidden');
+                        <div class="payment-info">
+                            <h5>Step 1: Send Money To</h5>
+                            <div class="payment-row">
+                                <span class="payment-label">Name:</span>
+                                <span class="payment-value">ATUGONZA SCOLAH</span>
+                            </div>
+                            <div class="payment-row">
+                                <span class="payment-label">Number:</span>
+                                <span class="payment-value">0743702573</span>
+                            </div>
+                            <div class="payment-row">
+                                <span class="payment-label">Network:</span>
+                                <span class="payment-value">Mobile Money</span>
+                            </div>
+                            <p style="font-size:0.8rem; color:#92400e; margin-top:8px;">Step 2: Enter Transaction ID + amount below and click Submit</p>
+                        </div>
 
-  document.getElementById('user').textContent = data.username;
-  document.getElementById('balance').textContent = data.balance;
-  document.getElementById('commission').textContent = data.commission_earned;
-}
+                        <div class="input-group">
+                            <input type="number" id="rechargeAmount" placeholder="Enter amount (Min 10,000)" min="10000">
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="rechargeTxId" placeholder="Enter Transaction ID from SMS">
+                        </div>
+                        <button class="btn btn-small" onclick="recharge()">Submit Recharge</button>
+                        <div id="rechargeMsg" class="success hidden"></div>
+                    </div>
 
-// LOGOUT
-function logout() {
-  document.getElementById('dashboard').classList.add('hidden');
-  document.getElementById('authBox').classList.remove('hidden');
-}
-</script>
+                    <div id="withdrawView" class="hidden">
+                        <h4>Withdraw Funds</h4>
+                        <div class="input-group">
+                            <input type="number" id="withdrawAmount" placeholder="Amount (Min 5,000)" min="5000">
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="withdrawAccount" placeholder="Mobile Money Number">
+                        </div>
+                        <button class="btn btn-small btn-danger" onclick="withdraw()">Submit Withdrawal</button>
+                        <div id="withdrawMsg" class="success hidden"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('home', this)"><div>🏠</div>Home</div>
+            <div class="nav-item" onclick="switchTab('profit', this)"><div>📈</div>Profit</div>
+            <div class="nav-item" onclick="switchTab('team', this)"><div>👥</div>Team</div>
+            <div class="nav-item" onclick="switchTab('my', this)"><div>💰</div>My</div>
+        </div>
+    </div>
+
+    <script>
+        // Profit table data
+        const profitPackages = [
+            { income: 10000, daily: 1000, days: 60, total: 60000 },
+            { income: 20000, daily: 2000, days: 60, total: 120000 },
+            { income: 50000, daily: 5000, days: 60, total: 300000 },
+            { income: 100000, daily: 10000, days: 60, total: 600000 },
+            { income: 200000, daily: 20000, days: 60, total: 1200000 },
+            { income: 400000, daily: 40000, days: 60, total: 2400000 },
+            { income: 500000, daily: 50000, days: 60, total: 3000000 },
+            { income: 1000000, daily: 100000, days: 60, total: 6000000 },
+            { income: 2000000, daily: 200000, days: 60, total: 12000000 }
+        ];
+
+        // Check for referral code in URL
+        function getReferrer() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('ref');
+        }
+
+        // Load user on page start
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedUser = localStorage.getItem('nexus_user');
+            if (savedUser) {
+                showDashboard(JSON.parse(savedUser));
+            }
+            renderProfitTable();
+            checkReferral();
+        });
+
+        function renderProfitTable() {
+            const tbody = document.getElementById('profitTableBody');
+            tbody.innerHTML = profitPackages.map(p => `
+                <tr>
+                    <td>UGX ${p.income.toLocaleString()}</td>
+                    <td class="highlight">UGX ${p.daily.toLocaleString()}</td>
+                    <td>${p.days}</td>
+                    <td class="highlight">UGX ${p.total.toLocaleString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        function checkReferral() {
+            const referrer = getReferrer();
+            if (referrer) {
+                document.getElementById('referralNotice').classList.remove('hidden');
+                document.getElementById('referrerName').textContent = referrer;
+                switchAuth('register');
+            }
+        }
+
+        function switchAuth(type) {
+            document.getElementById('loginTab').classList.remove('active');
+            document.getElementById('registerTab').classList.remove('active');
+            document.getElementById('loginForm').classList.remove('active');
+            document.getElementById('registerForm').classList.remove('active');
+
+            if (type === 'login') {
+                document.getElementById('loginTab').classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.getElementById('registerTab').classList.add('active');
+                document.getElementById('registerForm').classList.add('active');
+            }
+        }
+
+        function loginUser() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const errorEl = document.getElementById('loginError');
+
+            if (!username ||!password) {
+                errorEl.textContent = 'Please enter username and password';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            const allUsers = JSON.parse(localStorage.getItem('nexus_all_users') || '{}');
+            if (!allUsers[username]) {
+                errorEl.textContent = 'Account not found. Please register first.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            if (allUsers[username].password && allUsers[username].password!== password) {
+                errorEl.textContent = 'Incorrect password.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            errorEl.classList.add('hidden');
+            localStorage.setItem('nexus_user', JSON.stringify(allUsers[username]));
+            showDashboard(allUsers[username]);
+        }
+
+        function registerUser() {
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const errorEl = document.getElementById('registerError');
+
+            if (!username ||!password) {
+                errorEl.textContent = 'Please enter username and password';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            const allUsers = JSON.parse(localStorage.getItem('nexus_all_users') || '{}');
+            if (allUsers[username]) {
+                errorEl.textContent = 'Username taken. Choose another or login.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+            errorEl.classList.add('hidden');
+
+            const referrer = getReferrer();
+            let user = {
+                username: username,
+                password: password,
+                balance: 4000,
+                commissionEarned: 0,
+                transactions: [{
+                    type: 'Welcome Bonus',
+                    amount: 4000,
+                    date: new Date().toLocaleString()
+                }],
+                referrals: 0,
+                referredBy: referrer || null,
+                team: { A: [], B: [], C: [] }
+            };
+
+            if (referrer && allUsers[referrer]) {
+                allUsers[referrer].balance += 1000;
+                allUsers[referrer].commissionEarned = (allUsers[referrer].commissionEarned || 0) + 1000;
+                allUsers[referrer].referrals = (allUsers[referrer].referrals || 0) + 1;
+                allUsers[referrer].team.A.push(username);
+                allUsers[referrer].transactions.push({
+                    type: 'Referral Bonus',
+                    amount: 1000,
+                    date: new Date().toLocaleString()
+                });
+
+                if (allUsers[referrer].referredBy && allUsers[allUsers[referrer].referredBy]) {
+                    allUsers[allUsers[referrer].referredBy].team.B.push(username);
+
+                    const levelBUser = allUsers[allUsers[referrer].referredBy];
+                    if (levelBUser.referredBy && allUsers[levelBUser.referredBy]) {
+                        allUsers[levelBUser.referredBy].team.C.push(username);
+                    }
+                }
+            }
+
+            allUsers[username] = user;
+            localStorage.setItem('nexus_all_users', JSON.stringify(allUsers));
+            localStorage.setItem('nexus_user', JSON.stringify(user));
+            showDashboard(user);
+        }
+
+        function showDashboard(user) {
+            document.getElementById('login-screen').style.display = 'none';
+            document.body.style.display = 'block';
+            document.getElementById('app-dashboard').style.display = 'flex';
+            updateUI(user);
+        }
+
+        function logout() {
+            document.getElementById('app-dashboard').style.display = 'none';
+            document.body.style.display = 'flex';
+            document.getElementById('login-screen').style.display = 'block';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+            document.getElementById('regUsername').value = '';
+            document.getElementById('regPassword').value = '';
+            hideActionViews();
+        }
+
+        function updateUI(user) {
+            document.getElementById('displayUser').textContent = user.username;
+            document.getElementById('balance').textContent = user.balance.toLocaleString();
+            document.getElementById('commissionEarned').textContent = (user.commissionEarned || 0).toLocaleString();
+            document.getElementById('referralLink').textContent = `${window.location.origin}${window.location.pathname}?ref=${user.username}`;
+
+            document.getElementById('teamA').textContent = user.team?.A?.length || 0;
+            document.getElementById('teamB').textContent = user.team?.B?.length || 0;
+            document.getElementById('teamC').textContent = user.team?.C?.length || 0;
+
+            const teamListA = document.getElementById('teamListA');
+            const teamListB = document.getElementById('teamListB');
+            const teamListC = document.getElementById('teamListC');
+
+            teamListA.innerHTML = user.team?.A?.length? user.team.A.map(name => `<div class="team-item"><span>${name}</span><span>Level A</span></div>`).join('') : '<p style="color:#777;font-size:0.9rem;">No members yet</p>';
+            teamListB.innerHTML = user.team?.B?.length? user.team.B.map(name => `<div class="team-item"><span>${name}</span><span>Level B</span></div>`).join('') : '<p style="color:#777;font-size:0.9rem;">No members yet</p>';
+            teamListC.innerHTML = user.team?.C?.length? user.team.C.map(name => `<div class="team-item"><span>${name}</span><span>Level C</span></div>`).join('') : '<p style="color:#777;font-size:0.9rem;">No members yet</p>';
+
+            const txList = document.getElementById('txList');
+            if (user.transactions.length === 0) {
+                txList.innerHTML = '<p style="margin-top: 10px; color: #777;">No recent activity to display.</p>';
+            } else {
+                txList.innerHTML = user.transactions.slice(-5).reverse().map(tx => `
+                    <div class="tx-item">
+                        <div>
+                            <div><b>${tx.type}</b></div>
+                            <div style="font-size:0.8rem;color:#64748b">${tx.date}${tx.txId? ' • TxID: ' + tx.txId : ''}</div>
+                        </div>
+                        <div class="${tx.type === 'Withdrawal'? 'tx-debit' : 'tx-credit'}">
+                            ${tx.type === 'Withdrawal'? '-' : '+'}UGX ${tx.amount.toLocaleString()}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function hideActionViews() {
+            document.getElementById('rechargeView').classList.add('hidden');
+            document.getElementById('withdrawView').classList.add('hidden');
+            document.getElementById('rechargeMsg').classList.add('hidden');
+            document.getElementById('withdrawMsg').classList.add('hidden');
+        }
+
+        function showRecharge() {
+            hideActionViews();
+            document.getElementById('rechargeView').classList.remove('hidden');
+        }
+
+        function showWithdraw() {
+            hideActionViews();
+            document.getElementById('withdrawView').classList.remove('hidden');
+        }
+
+        function saveUser(user) {
+            localStorage.setItem('nexus_user', JSON.stringify(user));
+            const allUsers = JSON.parse(localStorage.getItem('nexus_all_users') || '{}');
+            allUsers[user.username] = user;
+            localStorage.setItem('nexus_all_users', JSON.stringify(allUsers));
+        }
+
+        function payReferralCommissions(username, amount) {
+            const allUsers = JSON.parse(localStorage.getItem('nexus_all_users') || '{}');
+            let currentUser = allUsers[username];
+            if (!currentUser ||!currentUser.referredBy) return;
+
+            const levelA = allUsers[currentUser.referredBy];
+            if (levelA) {
+                const commissionA = Math.floor(amount * 0.10);
+                levelA.balance += commissionA;
+                levelA.commissionEarned = (levelA.commissionEarned || 0) + commissionA;
+                levelA.transactions.push({
+                    type: 'Level A Commission',
+                    amount: commissionA,
+                    date: new Date().toLocaleString()
+                });
+
+                if (levelA.referredBy && allUsers[levelA.referredBy]) {
+                    const levelB = allUsers[levelA.referredBy];
+                    const commissionB = Math.floor(amount * 0.04);
+                    levelB.balance += commissionB;
+                    levelB.commissionEarned = (levelB.commissionEarned || 0) + commissionB;
+                    levelB.transactions.push({
+                        type: 'Level B Commission',
+                        amount: commissionB,
+                        date: new Date().toLocaleString()
+                    });
+
+                    if (levelB.referredBy && allUsers[levelB.referredBy]) {
+                        const levelC = allUsers[levelB.referredBy];
+                        const commissionC = Math.floor(amount * 0.02);
+                        levelC.balance += commissionC;
+                        levelC.commissionEarned = (levelC.commissionEarned || 0) + commissionC;
+                        levelC.transactions.push({
+                            type: 'Level C Commission',
+                            amount: commissionC,
+                            date: new Date().toLocaleString()
+                        });
+                    }
+                }
+            }
+            localStorage.setItem('nexus_all_users', JSON.stringify(allUsers));
+        }
+
+        function recharge() {
+            const amount = parseInt(document.getElementById('rechargeAmount').value);
+            const txId = document.getElementById('rechargeTxId').value.trim();
+            const msgEl = document.getElementById('rechargeMsg');
+            msgEl.classList.add('hidden');
+
+            if (!amount || amount < 10000) {
+                alert('Minimum recharge is UGX 10,000');
+                return;
+            }
+            if (!txId) {
+                alert('Please enter Transaction ID from Mobile Money SMS');
+                return;
+            }
+
+            let user = JSON.parse(localStorage.getItem('nexus_user'));
+            user.balance += amount;
+            user.transactions.push({
+                type: 'Recharge',
+                amount: amount,
+                date: new Date().toLocaleString(),
+                txId: txId
+            });
+
+            payReferralCommissions(user.username, amount);
+
+            saveUser(user);
+            updateUI(user);
+            document.getElementById('rechargeAmount').value = '';
+            document.getElementById('rechargeTxId').value = '';
+            msgEl.textContent = `Recharge of UGX ${amount.toLocaleString()} confirmed! TxID: ${txId}`;
+            msgEl.classList.remove('hidden');
+        }
+
+        function withdraw() {
+            const amount = parseInt(document.getElementById('withdrawAmount').value);
+            const account = document.getElementById('withdrawAccount').value.trim();
+            const msgEl = document.getElementById('withdrawMsg');
+            msgEl.classList.add('hidden');
+
+            let user = JSON.parse(localStorage.getItem('nexus_user'));
+
+            if (!amount || amount < 5000) {
+                alert('Minimum withdrawal is UGX 5,000');
+                return;
+            }
+            if (amount > user.balance) {
+                alert('Insufficient balance');
+                return;
+            }
+            if (!account) {
+                alert('Enter Mobile Money Number');
+                return;
+            }
+
+            user.balance -= amount;
+            user.transactions.push({
+                type: 'Withdrawal',
+                amount: amount,
+                date: new Date().toLocaleString()
+            });
+            saveUser(user);
+            updateUI(user);
+            document.getElementById('withdrawAmount').value = '';
+            document.getElementById('withdrawAccount').value = '';
+            msgEl.textContent = `Withdrawal of UGX ${amount.toLocaleString()} to ${account} submitted!`;
+            msgEl.classList.remove('hidden');
+        }
+
+        function copyReferral() {
+            const link = document.getElementById('referralLink').textContent;
+            navigator.clipboard.writeText(link);
+            alert('Referral link copied! Earn 10%/4%/2% from 3 levels.');
+        }
+
+        function switchTab(tabName, el) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            el.classList.add('active');
+        }
+    </script>
 </body>
 </html>
