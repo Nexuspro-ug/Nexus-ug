@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0"></script>
     <title>Nexus Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.0"></script>
     <style>
         /* Global Styles */
         * {
@@ -259,9 +259,11 @@ Deno.cron("daily-returns", "0 0 * * *", async () => {
                 <input type="password" id="regPassword" placeholder="Create a password">
             </div>
             <div id="registerError" class="error hidden"></div>
-        <button class="btn" onclick="register()">
-    <div id="msg"></div>
-<div id="app-dashboard">
+            <button class="btn" onclick="registerUser()">Register Now</button>
+        </div>
+    </div>
+
+    <div id="app-dashboard">
         <header>
     <h2>Nexus Pro</h2>
     <div>
@@ -802,26 +804,8 @@ Deno.cron("daily-returns", "0 0 * * *", async () => {
             document.getElementById(`tab-${tabName}`).classList.add('active');
             el.classList.add('active');
         }
-    <script>
-const SUPABASE_URL = 'https://ifndfvvxxazhbvsssvtv.supabase.co'
-const SUPABASE_KEY = 'sb_publishable_9KWRZ03ES_a7PUpeopmV9g_z8RIbEl9'
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-async function register() {
-  const name = document.getElementById('regName').value.trim();
-  const msg = document.getElementById('msg');
-  if (!name) { msg.innerHTML = 'Enter a username'; msg.style.color = 'red'; return; }
-  
-  msg.innerHTML = 'Registering...'; msg.style.color = 'black';
-  const { error } = await supabase.from('members').insert([{ name: name, balance: 0 }]);
-  
-  if (error) { msg.innerHTML = 'Error: ' + error.message; msg.style.color = 'red'; }
-  else { 
-    msg.innerHTML = 'Success! You are registered'; 
-    msg.style.color = 'green';
-    document.getElementById('regName').value = '';
-  }
-}
-</script>
+    </script>
 </body>
 </html>
+
+I think I should justte in these they’re correct
