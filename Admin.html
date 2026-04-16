@@ -1,18 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin Panel</title>
+  <title>Nexus Pro Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f8fafc; }
+    h1 { color: #0f172a; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; background: white; }
+    th, td { border: 1px solid #e2e8f0; padding: 12px; text-align: left; }
+    th { background: #f1f5f9; font-weight: 600; }
+    #usersList { margin-top: 16px; }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-  <h1>Nexus Admin Panel</h1>
-  <h2>All Members</h2>
-  <div id="usersList">Loading users...</div>
+  <h1>Nexus Pro Admin Panel</h1>
+  <h3>All Members</h3>
+  <div id="usersList">Loading members from Supabase...</div>
 
 <script>
   const supabaseUrl = 'https://ifndfvvxxazhbvsssvtv.supabase.co'
-  const supabaseKey = 'sb_publishable_9KWRZ03ES_a7PUpeopmV9g_z8RIbEl9'
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmbmRmdnZ4eGF6aGJ2c3NzdnR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMTY2MTYsImV4cCI6MjA5MTg5MjYxNn0.qrF9vxAEV4UiU-sr1o824ZYRIq33UQqpuLzKO4Vo1m0'
   const supabase = window.supabase.createClient(supabaseUrl, supabaseKey)
 
   async function loadUsers() {
@@ -23,10 +32,16 @@
 
     if (error) {
       document.getElementById('usersList').innerHTML = 'Error: ' + error.message
+      console.error(error)
       return
     }
 
-    let html = '<table border="1"><tr><th>Username</th><th>Balance</th><th>Commission</th><th>Referral</th><th>Joined</th></tr>'
+    if (!data || data.length === 0) {
+      document.getElementById('usersList').innerHTML = 'No members yet. Test signup on your Nexus app first.'
+      return
+    }
+
+    let html = '<table><tr><th>Username</th><th>Balance</th><th>Commission</th><th>Referral</th><th>Joined</th></tr>'
     data.forEach(user => {
       html += `<tr>
         <td>${user.username}</td>
