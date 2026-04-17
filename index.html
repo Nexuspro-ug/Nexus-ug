@@ -517,34 +517,82 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
             showDashboard(allUsers[username]);
         }
 
-        function registerUser() {
-        const username = document.getElementById('regUsername').value.trim();
-            const password = document.getElementById('regPassword').value.trim();
-            const errorEl = document.getElementById('registerError');
+        async function loginUser() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    const errorEl = document.getElementById('loginError');
+    errorEl.classList.add('hidden');
 
-            if (!username ||!password) {
-                errorEl.textContent = 'Please enter username and password';
-                errorEl.classList.remove('hidden');
-                return;
-            }
+    if (!username || !password) {
+        errorEl.textContent = 'Please enter username and password';
+        errorEl.classList.remove('hidden');
+        return;
+    }
 
-            const allUsers = JSON.parse(localStorage.getItem('nexus_all_users') || '{}');
-            if (allUsers[username]) {
-                errorEl.textContent = 'Username taken. Choose another or login.';
-                errorEl.classList.remove('hidden');
-                return;
-            }
-            errorEl.classList.add('hidden');
+    const { data, error } = await supabase
+        .from('members')
+        .select('*')
+        .eq('username', username)
+        .eq('password', password)
+        .single();
+    
+    if (error || !data) {
+        errorEl.textContent = 'Invalid username or password';
+        errorEl.classList.remove('hidden');
+        return;
+    }
 
-            const referrer = getReferrer();
-            let user = {
-                username: username,
-                balance: 4000,
-                commissionEarned: 0,
-                transactions: [{
-                    type: 'Welcome Bonus',
-                    amount: 4000,
-                    date: new Date().toLocaleString()
+    localStorage.setItem('nexus_user', JSON.stringify(data));
+    showDashboard(data);
+}
+
+async function registerUser() {
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value.trim();
+    const errorEl = document.getElementById('registerError');
+    errorEl.classList.add('hidden');
+
+    if (!username || !password) {
+        errorEl.textContent = 'Please enter username and password';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    const { data: existing } = await supabase
+        .from('members')
+        .select('id')
+        .eq('username', username)
+        .single();
+        
+    if (existing) {
+        errorEl.textContent = 'Username taken. Choose another or login.';
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    const { data, error } = await supabase
+        .from('members')
+        .insert([{ 
+            username, 
+            password, 
+            balance: 4000, 
+            commission_earned: 0 
+					  date: new Date().toLocaleString()
+        }])
+        .select()
+        .single();
+    
+    if (error) {
+        errorEl.textContent = 'Error: ' + error.message;
+        errorEl.classList.remove('hidden');
+        return;
+    }
+
+    // TODO: Add referral bonus logic here using Supabase updates
+    alert('Account created! Please sign in.');
+    switchAuth('login');
+}
+                  
                 }],
                 referrals: 0,
                 referredBy: referrer || null,
