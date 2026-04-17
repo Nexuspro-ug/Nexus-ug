@@ -50,18 +50,28 @@ async function login() {
   const { data, error } = await client
     .from("users")
     .select("*")
-    .eq("phone", phone)
-    .eq("password", password)
-    .single();
+    .eq("phone", phone);
 
-  if (error || !data) {
-    alert("Wrong phone or password");
+  console.log("PHONE ENTERED:", phone);
+  console.log("PASSWORD ENTERED:", password);
+  console.log("DATA FROM DB:", data);
+
+  if (!data || data.length === 0) {
+    alert("User not found");
     return;
   }
 
-  loadDashboard(data);
-}
+  const user = data[0];
 
+  console.log("DB PASSWORD:", user.password);
+
+  if (user.password !== password) {
+    alert("Wrong password");
+    return;
+  }
+
+  loadDashboard(user);
+}
 // DASHBOARD
 function loadDashboard(user) {
   document.getElementById("app").innerHTML = `
