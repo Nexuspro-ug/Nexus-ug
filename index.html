@@ -582,7 +582,6 @@ Deno.cron("daily-returns", "0 0 * * *", async () => {
 
     alert('Account created successfully! Please login.');
 }
-
             const allUsers = JSON.parse(localStorage.getItem('nexus_all_users') || '{}');
             if (allUsers[username]) {
                 errorEl.textContent = 'Username taken. Choose another or login.';
