@@ -1,163 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Nexus Pro Admin</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>Admin Test</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    body { font-family: sans-serif; padding: 20px; background: #f8fafc; margin: 0; }
-    h1,h2 { color: #0f172a; margin: 0 0 15px 0; }
-    .tab { display: inline-block; padding: 10px 20px; background: #e2e8f0; margin-right: 5px; cursor: pointer; border-radius: 8px 8px 0 0; }
-    .tab.active { background: #fff; font-weight: bold; }
-    .content { background: white; padding: 20px; border-radius: 0 8px 8px 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    table { border-collapse: collapse; width: 100%; margin-top: 15px; font-size: 14px; }
-    th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; }
-    th { background: #f1f5f9; }
-    button { padding: 6px 12px; margin: 2px; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; }
-    .approve { background: #22c55e; color: white; }
-    .reject { background: #ef4444; color: white; }
-    .update { background: #3b82f6; color: white; }
-    .error { color: red; font-weight: bold; }
-    #loginBox { max-width: 300px; margin: 100px auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    input[type="password"], input[type="number"] { width: 100%; padding: 10px; margin-top: 10px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 4px; }
-    .small-input { width: 80px !important; padding: 5px !important; }
-    .status-pending { color: #f59e0b; font-weight: bold; }
-    .status-approved { color: #22c55e; font-weight: bold; }
-    .status-rejected { color: #ef4444; font-weight: bold; }
-    .status-paid { color: #3b82f6; font-weight: bold; }
-  </style>
 </head>
 <body>
-<div id="loginBox">
-  <h3>Admin Login</h3>
-  <input type="password" id="pass" placeholder="Password">
-  <button onclick="checkPass()" style="width:100%;margin-top:10px;background:#0f172a;color:white;">Enter</button>
-  <div id="loginError" class="error"></div>
-</div>
+  <h2 id="status">Testing Supabase...</h2>
+  <pre id="output"></pre>
 
-<div id="adminPanel" style="display:none;">
-  <h1>Nexus Pro Admin Panel</h1>
-  
-  <div>
-    <div class="tab active" onclick="showTab('members', event)">Members</div>
-    <div class="tab" onclick="showTab('deposits', event)">Recharges</div>
-    <div class="tab" onclick="showTab('withdrawals', event)">Withdrawals</div>
-  </div>
-
-  <div id="members" class="content"><div id="membersList">Loading...</div></div>
-  <div id="deposits" class="content" style="display:none;"><div id="depositsList">Loading...</div></div>
-  <div id="withdrawals" class="content" style="display:none;"><div id="withdrawalsList">Loading...</div></div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const ADMIN_PASSWORD = "nexus123";
 const supabaseUrl = 'https://ifndfvvxxazhbvsssvtv.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseKey = 'PASTE_YOUR_FULL_ANON_KEY_HERE'; // Get from Supabase > Settings > API
 
-function checkPass() {
-  if (document.getElementById('pass').value === ADMIN_PASSWORD) {
-    document.getElementById('loginBox').style.display = 'none';
-    document.getElementById('adminPanel').style.display = 'block';
-    loadMembers(); loadDeposits(); loadWithdrawals();
-  } else {
-    document.getElementById('loginError').innerText = 'Wrong password';
-  }
-}
+document.getElementById('output').innerText = 'Step 1: Keys set\n';
 
-function showTab(tab, e) {
-  document.querySelectorAll('.content').forEach(el => el.style.display = 'none');
-  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
-  document.getElementById(tab).style.display = 'block';
-  e.target.classList.add('active');
-}
-
-async function loadMembers() {
-  const { data, error } = await supabase.from('members').select('*').order('created_at', { ascending: false });
-  if (error) return document.getElementById('membersList').innerHTML = `<div class='error'>Error: ${error.message}</div>`;
-  if (!data || data.length === 0) return document.getElementById('membersList').innerHTML = "No members yet.";
+try {
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  document.getElementById('output').innerText += 'Step 2: Supabase client created\n';
   
-  let html = "<table><tr><th>Username</th><th>Balance</th><th>Commission</th><th>Joined</th><th>Action</th></tr>";
-  data.forEach(u => {
-    html += `<tr>
-      <td>${u.username||'-'}</td>
-      <td><input type="number" value="${u.balance||0}" id="bal-${u.id}" class="small-input"> UGX</td>
-      <td><input type="number" value="${u.commission_earned||0}" id="com-${u.id}" class="small-input"> UGX</td>
-      <td>${u.created_at ? new Date(u.created_at).toLocaleDateString() : '-'}</td>
-      <td><button class="update" onclick="updateMember(${u.id})">Save</button></td>
-    </tr>`;
+  supabase.from('members').select('*').then(res => {
+    if (res.error) {
+      document.getElementById('status').innerText = 'ERROR FOUND:';
+      document.getElementById('output').innerText += JSON.stringify(res.error, null, 2);
+    } else {
+      document.getElementById('status').innerText = 'SUCCESS! Database connected';
+      document.getElementById('output').innerText += 'Members found: ' + JSON.stringify(res.data, null, 2);
+    }
   });
-  document.getElementById('membersList').innerHTML = html + "</table>";
-}
-
-async function updateMember(id) {
-  const newBal = document.getElementById(`bal-${id}`).value;
-  const newCom = document.getElementById(`com-${id}`).value;
-  const { error } = await supabase.from('members').update({ balance: newBal, commission_earned: newCom }).eq('id', id);
-  if (error) alert('Error: ' + error.message);
-  else { alert('Member updated'); loadMembers(); }
-}
-
-async function loadDeposits() {
-  const { data, error } = await supabase.from('deposits').select('*').order('created_at', { ascending: false });
-  if (error) return document.getElementById('depositsList').innerHTML = `<div class='error'>Error: ${error.message}</div>`;
-  if (!data || data.length === 0) return document.getElementById('depositsList').innerHTML = "No recharge requests.";
-  
-  let html = "<table><tr><th>User</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr>";
-  data.forEach(d => {
-    html += `<tr>
-      <td>${d.username}</td>
-      <td>${d.amount} UGX</td>
-      <td class="status-${d.status}">${d.status}</td>
-      <td>${new Date(d.created_at).toLocaleString()}</td>
-      <td>${d.status === 'pending' ? `
-        <button class="approve" onclick="approveDeposit(${d.id}, '${d.username}', ${d.amount})">Approve</button>
-        <button class="reject" onclick="rejectItem('deposits', ${d.id})">Reject</button>` : '-'}</td>
-    </tr>`;
-  });
-  document.getElementById('depositsList').innerHTML = html + "</table>";
-}
-
-async function approveDeposit(id, username, amount) {
-  await supabase.from('deposits').update({ status: 'approved' }).eq('id', id);
-  const { data: user } = await supabase.from('members').select('balance').eq('username', username).single();
-  const newBalance = (user?.balance || 0) + Number(amount);
-  await supabase.from('members').update({ balance: newBalance }).eq('username', username);
-  alert('Deposit approved. User balance updated.');
-  loadDeposits(); loadMembers();
-}
-
-async function loadWithdrawals() {
-  const { data, error } = await supabase.from('withdrawals').select('*').order('created_at', { ascending: false });
-  if (error) return document.getElementById('withdrawalsList').innerHTML = `<div class='error'>Error: ${error.message}</div>`;
-  if (!data || data.length === 0) return document.getElementById('withdrawalsList').innerHTML = "No withdrawal requests.";
-  
-  let html = "<table><tr><th>User</th><th>Amount</th><th>Phone</th><th>Status</th><th>Action</th></tr>";
-  data.forEach(w => {
-    html += `<tr>
-      <td>${w.username}</td>
-      <td>${w.amount} UGX</td>
-      <td>${w.phone}</td>
-      <td class="status-${w.status}">${w.status}</td>
-      <td>${w.status === 'pending' ? `
-        <button class="approve" onclick="approveWithdraw(${w.id})">Mark Paid</button>
-        <button class="reject" onclick="rejectItem('withdrawals', ${w.id})">Reject</button>` : '-'}</td>
-    </tr>`;
-  });
-  document.getElementById('withdrawalsList').innerHTML = html + "</table>";
-}
-
-async function approveWithdraw(id) {
-  await supabase.from('withdrawals').update({ status: 'paid' }).eq('id', id);
-  alert('Marked as paid. Send Mobile Money to user.');
-  loadWithdrawals();
-}
-
-async function rejectItem(table, id) {
-  await supabase.from(table).update({ status: 'rejected' }).eq('id', id);
-  alert('Rejected');
-  if (table === 'deposits') loadDeposits(); else loadWithdrawals();
+} catch (e) {
+  document.getElementById('status').innerText = 'JS CRASHED:';
+  document.getElementById('output').innerText += e.message;
 }
 </script>
 </body>
