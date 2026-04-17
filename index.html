@@ -807,9 +807,15 @@ Deno.cron("daily-returns", "0 0 * * *", async () => {
         .eq('id', user.id);
 
     // ✅ Update local user
-    user.balance -= amount;
-    localStorage.setItem('nexus_user', JSON.stringify(user));
+    
+const { data: updatedUser } = await supabase
+  .from('members')
+  .select('*')
+  .eq('id', user.id)
+  .single();
 
+localStorage.setItem('nexus_user', JSON.stringify(updatedUser));
+updateUI(updatedUser);
     // ✅ Clear inputs
     document.getElementById('withdrawAmount').value = '';
     document.getElementById('withdrawAccount').value = '';
