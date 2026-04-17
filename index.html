@@ -218,6 +218,7 @@ Deno.cron("daily-returns", "0 0 * * *", async () => {
 });
 
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
 
@@ -445,6 +446,10 @@ Deno.cron("daily-returns", "0 0 * * *", async () => {
     </div>
 
     <script>
+        const supabase = window.supabase.createClient(
+  "https://ygmsmgzntgntutqbmxcg.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlnbXNtZ3pudGdudHV0cWJteGNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MTI5NzIsImV4cCI6MjA5MTk4ODk3Mn0._EMpan3j53JTf7PiD68l38f1AmMHTC_tM1wSLDa_mDM"
+);
         // Profit table data
         const profitPackages = [
             { income: 10000, daily: 1000, days: 60, total: 60000 },
