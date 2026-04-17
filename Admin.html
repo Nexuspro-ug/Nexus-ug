@@ -2,35 +2,86 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Admin Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin</title>
+  <style>
+    body { font-family: sans-serif; background: #111; color: #fff; padding: 20px; }
+    .tab { display: inline-block; padding: 10px 20px; background: #333; margin-right: 5px; cursor: pointer; }
+    .tab.active { background: #7c3aed; }
+    .content { display: none; margin-top: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    td, th { border: 1px solid #444; padding: 8px; text-align: left; }
+    input, button { padding: 10px; margin: 5px 0; background: #222; color: #fff; border: 1px solid #444; }
+    #adminPanel { display: none; }
+  </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <h2 id="status">Testing Supabase...</h2>
-  <pre id="output"></pre>
+  <div id="loginBox">
+    <h2>Admin Login</h2>
+    <input type="password" id="pass" placeholder="Password">
+    <button onclick="checkPass()">Login</button>
+    <p id="loginError" style="color:#f43f5e"></p>
+  </div>
+
+  <div id="adminPanel">
+    <h2>Nexus Admin Dashboard</h2>
+    <div class="tab active" onclick="showTab('members', this)">Members</div>
+    <div class="tab" onclick="showTab('deposits', this)">Deposits</div>
+    <div class="tab" onclick="showTab('withdrawals', this)">Withdrawals</div>
+
+    <div id="members" class="content" style="display:block"><div id="membersTable">Loading...</div></div>
+    <div id="deposits" class="content"><div id="depositsTable">Loading...</div></div>
+    <div id="withdrawals" class="content"><div id="withdrawalsTable">Loading...</div></div>
+  </div>
 
 <script>
+const ADMIN_PASSWORD = "nexus123";
 const supabaseUrl = 'https://ifndfvvxxazhbvsssvtv.supabase.co';
-const supabaseKey ='sb_publishable_9KWRZ03ES_a7PUpeopmV9g_z8RIbEl9'; // Get from Supabase > Settings > API
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmbmRmdnZ4eGF6aGJ2c3NzdnR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMTY2MTYsImV4cCI6MjA5MTg5MjYxNn0.qrF9vxAEV4UiU-sr1o824ZYRIq33UQqpuLzKO4Vo1m0';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-document.getElementById('output').innerText = 'Step 1: Keys set\n';
+function checkPass() {
+  if (document.getElementById('pass').value === ADMIN_PASSWORD) {
+    document.getElementById('loginBox').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    loadMembers(); loadDeposits(); loadWithdrawals();
+  } else {
+    document.getElementById('loginError').innerText = 'Wrong password';
+  }
+}
 
-try {
-  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-  document.getElementById('output').innerText += 'Step 2: Supabase client created\n';
-  
-  supabase.from('members').select('*').then(res => {
-    if (res.error) {
-      document.getElementById('status').innerText = 'ERROR FOUND:';
-      document.getElementById('output').innerText += JSON.stringify(res.error, null, 2);
-    } else {
-      document.getElementById('status').innerText = 'SUCCESS! Database connected';
-      document.getElementById('output').innerText += 'Members found: ' + JSON.stringify(res.data, null, 2);
-    }
-  });
-} catch (e) {
-  document.getElementById('status').innerText = 'JS CRASHED:';
-  document.getElementById('output').innerText += e.message;
+function showTab(id, el) {
+  document.querySelectorAll('.content').forEach(c => c.style.display = 'none');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).style.display = 'block';
+  el.classList.add('active');
+}
+
+async function loadMembers() {
+  const { data, error } = await supabase.from('members').select('*');
+  if (error) return document.getElementById('membersTable').innerText = 'Error: ' + error.message;
+  let html = '<table><tr><th>ID</th><th>Username</th><th>Balance</th><th>Commission</th></tr>';
+  data.forEach(m => html += `<tr><td>${m.id}</td><td>${m.username}</td><td>${m.balance}</td><td>${m.commission_earned}</td></tr>`);
+  document.getElementById('membersTable').innerHTML = html + '</table>';
+}
+
+async function loadDeposits() {
+  const { data, error } = await supabase.from('deposits').select('*');
+  if (error) return document.getElementById('depositsTable').innerText = 'Error: ' + error.message;
+  let html = '<table><tr><th>ID</th><th>Username</th><th>Amount</th><th>Status</th></tr>';
+  if(data.length === 0) html += '<tr><td colspan="4">No deposits yet</td></tr>';
+  data.forEach(d => html += `<tr><td>${d.id}</td><td>${d.username}</td><td>${d.amount}</td><td>${d.status}</td></tr>`);
+  document.getElementById('depositsTable').innerHTML = html + '</table>';
+}
+
+async function loadWithdrawals() {
+  const { data, error } = await supabase.from('withdrawals').select('*');
+  if (error) return document.getElementById('withdrawalsTable').innerText = 'Error: ' + error.message;
+  let html = '<table><tr><th>ID</th><th>Username</th><th>Amount</th><th>Phone</th><th>Status</th></tr>';
+  if(data.length === 0) html += '<tr><td colspan="5">No withdrawals yet</td></tr>';
+  data.forEach(w => html += `<tr><td>${w.id}</td><td>${w.username}</td><td>${w.amount}</td><td>${w.phone}</td><td>${w.status}</td></tr>`);
+  document.getElementById('withdrawalsTable').innerHTML = html + '</table>';
 }
 </script>
 </body>
