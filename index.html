@@ -827,14 +827,23 @@ Deno.cron("daily-returns", "0 0 * * *", async () => {
 
     const user = JSON.parse(localStorage.getItem('nexus_user'));
 
-    const { error } = await supabase.from('withdrawals').insert([
-        {
-            user_id: user.id,
-            amount: amount,
-            phone_number: account,
-            status: 'pending'
-        }
-    ]);
+    // 🚨 Check balance
+    if (amount > user.balance) {
+        alert('Insufficient balance');
+        return;
+    }
+
+    // ✅ Insert withdrawal request
+    const { error } = await supabase
+        .from('withdrawals')
+        .insert([
+            {
+                user_id: user.id,
+                amount: amount,
+                phone_number: account,
+                status: 'pending'
+            }
+        ]);
 
     if (error) {
         alert('Error submitting withdrawal');
@@ -842,25 +851,22 @@ Deno.cron("daily-returns", "0 0 * * *", async () => {
         return;
     }
 
+    // ✅ Update balance in database
+    await supabase
+        .from('members')
+        .update({ balance: user.balance - amount })
+        .eq('id', user.id);
+
+    // ✅ Update local user
+    user.balance -= amount;
+    localStorage.setItem('nexus_user', JSON.stringify(user));
+
+    // ✅ Clear inputs
     document.getElementById('withdrawAmount').value = '';
     document.getElementById('withdrawAccount').value = '';
 
     alert('Withdrawal request sent! Waiting for admin approval.');
 }
-
-            user.balance -= amount;
-            user.transactions.push({
-                type: 'Withdrawal',
-                amount: amount,
-                date: new Date().toLocaleString()
-            });
-            saveUser(user);
-            updateUI(user);
-            document.getElementById('withdrawAmount').value = '';
-            document.getElementById('withdrawAccount').value = '';
-            msgEl.textContent = `Withdrawal of UGX ${amount.toLocaleString()} to ${account} submitted!`;
-            msgEl.classList.remove('hidden');
-        }
 
         function copyReferral() {
             const link = document.getElementById('referralLink').textContent;
