@@ -425,6 +425,9 @@
     </div>
 
     <script>
+        const supabaseUrl = 'https://ygmsmgzntgntutqbmxcg.supabase.co';
+const supabaseKey = 'sb_publishable_pQ_jHDaaVAPmADSqIoG7lQ_wtdKyqbr';
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
         // Profit table data
         const profitPackages = [
             { income: 10000, daily: 1000, days: 60, total: 60000 },
