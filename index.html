@@ -544,16 +544,44 @@ Deno.cron("daily-returns", "0 0 * * *", async () => {
             showDashboard(allUsers[username]);
         }
 
-        function registerUser() {
-            const username = document.getElementById('regUsername').value.trim();
-            const password = document.getElementById('regPassword').value.trim();
-            const errorEl = document.getElementById('registerError');
+        async function registerUser() {
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value.trim();
 
-            if (!username ||!password) {
-                errorEl.textContent = 'Please enter username and password';
-                errorEl.classList.remove('hidden');
-                return;
-            }
+    if (!username || !password) {
+        alert('Enter username and password');
+        return;
+    }
+
+    const { data: existing } = await supabase
+        .from('members')
+        .select('*')
+        .eq('username', username)
+        .single();
+
+    if (existing) {
+        alert('Username already taken');
+        return;
+    }
+
+    const { error } = await supabase.from('members').insert([
+        {
+            username: username,
+            password: password,
+            balance: 4000,
+            commission_earned: 0,
+            role: 'user'
+        }
+    ]);
+
+    if (error) {
+        alert('Error creating account');
+        console.log(error);
+        return;
+    }
+
+    alert('Account created successfully! Please login.');
+}
 
             const allUsers = JSON.parse(localStorage.getItem('nexus_all_users') || '{}');
             if (allUsers[username]) {
