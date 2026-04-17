@@ -44,8 +44,8 @@ async function register() {
 
 // LOGIN
 async function login() {
-  const phone = document.getElementById("phone").value;
-  const password = document.getElementById("password").value;
+  const phone = document.getElementById("phone").value.trim();
+  const password = document.getElementById("password").value.trim();
 
   const { data, error } = await client
     .from("users")
