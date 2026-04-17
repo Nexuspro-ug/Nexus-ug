@@ -582,57 +582,7 @@ Deno.cron("daily-returns", "0 0 * * *", async () => {
 
     alert('Account created successfully! Please login.');
 }
-            const allUsers = JSON.parse(localStorage.getItem('nexus_all_users') || '{}');
-            if (allUsers[username]) {
-                errorEl.textContent = 'Username taken. Choose another or login.';
-                errorEl.classList.remove('hidden');
-                return;
-            }
-            errorEl.classList.add('hidden');
-
-            const referrer = getReferrer();
-            let user = {
-                username: username,
-                password: password,
-                balance: 4000,
-                commissionEarned: 0,
-                transactions: [{
-                    type: 'Welcome Bonus',
-                    amount: 4000,
-                    date: new Date().toLocaleString()
-                }],
-                referrals: 0,
-                referredBy: referrer || null,
-                team: { A: [], B: [], C: [] }
-            };
-
-            if (referrer && allUsers[referrer]) {
-                allUsers[referrer].balance += 1000;
-                allUsers[referrer].commissionEarned = (allUsers[referrer].commissionEarned || 0) + 1000;
-                allUsers[referrer].referrals = (allUsers[referrer].referrals || 0) + 1;
-                allUsers[referrer].team.A.push(username);
-                allUsers[referrer].transactions.push({
-                    type: 'Referral Bonus',
-                    amount: 1000,
-                    date: new Date().toLocaleString()
-                });
-
-                if (allUsers[referrer].referredBy && allUsers[allUsers[referrer].referredBy]) {
-                    allUsers[allUsers[referrer].referredBy].team.B.push(username);
-
-                    const levelBUser = allUsers[allUsers[referrer].referredBy];
-                    if (levelBUser.referredBy && allUsers[levelBUser.referredBy]) {
-                        allUsers[levelBUser.referredBy].team.C.push(username);
-                    }
-                }
-            }
-
-            allUsers[username] = user;
-            localStorage.setItem('nexus_all_users', JSON.stringify(allUsers));
-            localStorage.setItem('nexus_user', JSON.stringify(user));
-            showDashboard(user);
-        }
-
+            
         function showDashboard(user) {
             document.getElementById('login-screen').style.display = 'none';
             document.body.style.display = 'block';
