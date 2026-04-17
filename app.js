@@ -16,8 +16,8 @@ function showLogin() {
 
 // REGISTER
 async function register() {
-  const phone = document.getElementById("phone").value;
-  const password = document.getElementById("password").value;
+  const phone = document.getElementById("phone").value.trim();
+  const password = document.getElementById("password").value.trim();
 
   // check if user exists
   const { data: existing } = await client
