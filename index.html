@@ -495,6 +495,7 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
         }
 
         function loginUser() {
+        alert("LOGIN WORKING");
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value.trim();
             const errorEl = document.getElementById('loginError');
@@ -518,6 +519,7 @@ const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
         }
 
         function registerUser() {
+        alert("REGISTER WORKING")
             const username = document.getElementById('regUsername').value.trim();
             const password = document.getElementById('regPassword').value.trim();
             const errorEl = document.getElementById('registerError');
