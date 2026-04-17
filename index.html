@@ -811,26 +811,42 @@ Deno.cron("daily-returns", "0 0 * * *", async () => {
             msgEl.classList.remove('hidden');
         }
 
-        function withdraw() {
-            const amount = parseInt(document.getElementById('withdrawAmount').value);
-            const account = document.getElementById('withdrawAccount').value.trim();
-            const msgEl = document.getElementById('withdrawMsg');
-            msgEl.classList.add('hidden');
+        async function withdraw() {
+    const amount = parseInt(document.getElementById('withdrawAmount').value);
+    const account = document.getElementById('withdrawAccount').value.trim();
 
-            let user = JSON.parse(localStorage.getItem('nexus_user'));
+    if (!amount || amount < 5000) {
+        alert('Minimum withdrawal is UGX 5,000');
+        return;
+    }
 
-            if (!amount || amount < 5000) {
-                alert('Minimum withdrawal is UGX 5,000');
-                return;
-            }
-            if (amount > user.balance) {
-                alert('Insufficient balance');
-                return;
-            }
-            if (!account) {
-                alert('Enter Mobile Money Number');
-                return;
-            }
+    if (!account) {
+        alert('Enter Mobile Money Number');
+        return;
+    }
+
+    const user = JSON.parse(localStorage.getItem('nexus_user'));
+
+    const { error } = await supabase.from('withdrawals').insert([
+        {
+            user_id: user.id,
+            amount: amount,
+            phone_number: account,
+            status: 'pending'
+        }
+    ]);
+
+    if (error) {
+        alert('Error submitting withdrawal');
+        console.log(error);
+        return;
+    }
+
+    document.getElementById('withdrawAmount').value = '';
+    document.getElementById('withdrawAccount').value = '';
+
+    alert('Withdrawal request sent! Waiting for admin approval.');
+}
 
             user.balance -= amount;
             user.transactions.push({
