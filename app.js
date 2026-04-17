@@ -6,69 +6,80 @@ const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 function showLogin() {
   document.getElementById("app").innerHTML = `
     <h1>Nexus Pro</h1>
-    <p>Smart Investment Platform</p>
-    <input id="email" placeholder="Email"><br>
+    <p>Login with Phone</p>
+    <input id="phone" placeholder="Phone Number"><br>
     <input id="password" type="password" placeholder="Password"><br>
     <button onclick="register()">Register</button>
     <button onclick="login()">Login</button>
   `;
 }
 
+// REGISTER
 async function register() {
-  const email = document.getElementById("email").value;
+  const phone = document.getElementById("phone").value;
   const password = document.getElementById("password").value;
 
-  const { error } = await client.auth.signUp({
-    email,
-    password
-  });
-
-  if (error) return alert(error.message);
-
-  await client.from("users").insert([
-    { email, balance: 1000 }
-  ]);
-
-  alert("Account created! Please login.");
-}
-
-async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  const { error } = await client.auth.signInWithPassword({
-    email,
-    password
-  });
-
-  if (error) return alert(error.message);
-
-  loadDashboard(email);
-}
-
-async function loadDashboard(email) {
-  const { data } = await client
+  // check if user exists
+  const { data: existing } = await client
     .from("users")
     .select("*")
-    .eq("email", email)
+    .eq("phone", phone)
     .single();
 
+  if (existing) {
+    alert("User already exists");
+    return;
+  }
+
+  await client.from("users").insert([
+    {
+      phone,
+      password,
+      balance: 1000
+    }
+  ]);
+
+  alert("Account created! Login now.");
+}
+
+// LOGIN
+async function login() {
+  const phone = document.getElementById("phone").value;
+  const password = document.getElementById("password").value;
+
+  const { data, error } = await client
+    .from("users")
+    .select("*")
+    .eq("phone", phone)
+    .eq("password", password)
+    .single();
+
+  if (error || !data) {
+    alert("Wrong phone or password");
+    return;
+  }
+
+  loadDashboard(data);
+}
+
+// DASHBOARD
+function loadDashboard(user) {
   document.getElementById("app").innerHTML = `
     <h2>Welcome to Nexus Pro</h2>
-
     <div class="card">
-      <h3>Balance: $${data.balance}</h3>
-      <button onclick="invest('${email}')">Invest</button>
+      <h3>Balance: $${user.balance}</h3>
+      <button onclick="invest('${user.phone}')">Invest</button>
       <button onclick="logout()">Logout</button>
     </div>
   `;
 }
 
-async function invest(email) {
+// INVEST
+async function invest(phone) {
   const { data } = await client
     .from("users")
     .select("*")
-    .eq("email", email)
+    .eq("phone", phone)
     .single();
 
   const profit = Math.floor(Math.random() * 100);
@@ -77,11 +88,12 @@ async function invest(email) {
   await client
     .from("users")
     .update({ balance: newBalance })
-    .eq("email", email);
+    .eq("phone", phone);
 
-  loadDashboard(email);
+  loadDashboard({ ...data, balance: newBalance });
 }
 
+// LOGOUT
 function logout() {
   location.reload();
 }
