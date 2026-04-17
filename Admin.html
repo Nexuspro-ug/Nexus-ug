@@ -11,16 +11,17 @@
     .content { display: none; margin-top: 20px; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     td, th { border: 1px solid #444; padding: 8px; text-align: left; }
-    input, button { padding: 10px; margin: 5px 0; background: #222; color: #fff; border: 1px solid #444; }
     #adminPanel { display: none; }
+    #error { color: #f43f5e; margin-top: 20px; }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <div id="loginBox">
     <h2>Admin Login</h2>
+    <p>If button fails, add ?pass=nexus123 to the URL</p>
     <input type="password" id="pass" placeholder="Password">
-    <button onclick="checkPass()">Login</button>
+    <button type="button" onclick="checkPass()">Login</button>
     <p id="loginError" style="color:#f43f5e"></p>
   </div>
 
@@ -34,54 +35,72 @@
     <div id="deposits" class="content"><div id="depositsTable">Loading...</div></div>
     <div id="withdrawals" class="content"><div id="withdrawalsTable">Loading...</div></div>
   </div>
+  
+  <div id="error"></div>
 
 <script>
-const ADMIN_PASSWORD = "nexus123";
-const supabaseUrl = 'https://ifndfvvxxazhbvsssvtv.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmbmRmdnZ4eGF6aGJ2c3NzdnR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMTY2MTYsImV4cCI6MjA5MTg5MjYxNn0.qrF9vxAEV4UiU-sr1o824ZYRIq33UQqpuLzKO4Vo1m0';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+try {
+  const ADMIN_PASSWORD = "nexus123";
+  const supabaseUrl = 'https://ifndfvvxxazhbvsssvtv.supabase.co';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlmbmRmdnZ4eGF6aGJ2c3NzdnR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYzMTY2MTYsImV4cCI6MjA5MTg5MjYxNn0.qrF9vxAEV4UiU-sr1o824ZYRIq33UQqpuLzKO4Vo1m0';
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-function checkPass() {
-  if (document.getElementById('pass').value === ADMIN_PASSWORD) {
+  // Auto-login if ?pass=nexus123 is in URL
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('pass') === ADMIN_PASSWORD) {
+    doLogin();
+  }
+
+  function checkPass() {
+    const inputPass = document.getElementById('pass').value;
+    if (inputPass === ADMIN_PASSWORD) {
+      doLogin();
+    } else {
+      document.getElementById('loginError').innerText = 'Wrong password';
+    }
+  }
+
+  function doLogin() {
     document.getElementById('loginBox').style.display = 'none';
     document.getElementById('adminPanel').style.display = 'block';
     loadMembers(); loadDeposits(); loadWithdrawals();
-  } else {
-    document.getElementById('loginError').innerText = 'Wrong password';
   }
-}
 
-function showTab(id, el) {
-  document.querySelectorAll('.content').forEach(c => c.style.display = 'none');
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(id).style.display = 'block';
-  el.classList.add('active');
-}
+  function showTab(id, el) {
+    document.querySelectorAll('.content').forEach(c => c.style.display = 'none');
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).style.display = 'block';
+    el.classList.add('active');
+  }
 
-async function loadMembers() {
-  const { data, error } = await supabase.from('members').select('*');
-  if (error) return document.getElementById('membersTable').innerText = 'Error: ' + error.message;
-  let html = '<table><tr><th>ID</th><th>Username</th><th>Balance</th><th>Commission</th></tr>';
-  data.forEach(m => html += `<tr><td>${m.id}</td><td>${m.username}</td><td>${m.balance}</td><td>${m.commission_earned}</td></tr>`);
-  document.getElementById('membersTable').innerHTML = html + '</table>';
-}
+  async function loadMembers() {
+    const { data, error } = await supabase.from('members').select('*');
+    if (error) return document.getElementById('membersTable').innerText = 'Error: ' + error.message;
+    let html = '<table><tr><th>ID</th><th>Username</th><th>Balance</th><th>Commission</th></tr>';
+    if(data.length === 0) html += '<tr><td colspan="4">No members</td></tr>';
+    data.forEach(m => html += `<tr><td>${m.id}</td><td>${m.username}</td><td>${m.balance}</td><td>${m.commission_earned}</td></tr>`);
+    document.getElementById('membersTable').innerHTML = html + '</table>';
+  }
 
-async function loadDeposits() {
-  const { data, error } = await supabase.from('deposits').select('*');
-  if (error) return document.getElementById('depositsTable').innerText = 'Error: ' + error.message;
-  let html = '<table><tr><th>ID</th><th>Username</th><th>Amount</th><th>Status</th></tr>';
-  if(data.length === 0) html += '<tr><td colspan="4">No deposits yet</td></tr>';
-  data.forEach(d => html += `<tr><td>${d.id}</td><td>${d.username}</td><td>${d.amount}</td><td>${d.status}</td></tr>`);
-  document.getElementById('depositsTable').innerHTML = html + '</table>';
-}
+  async function loadDeposits() {
+    const { data, error } = await supabase.from('deposits').select('*');
+    if (error) return document.getElementById('depositsTable').innerText = 'Error: ' + error.message;
+    let html = '<table><tr><th>ID</th><th>Username</th><th>Amount</th><th>Status</th></tr>';
+    if(data.length === 0) html += '<tr><td colspan="4">No deposits yet</td></tr>';
+    data.forEach(d => html += `<tr><td>${d.id}</td><td>${d.username}</td><td>${d.amount}</td><td>${d.status}</td></tr>`);
+    document.getElementById('depositsTable').innerHTML = html + '</table>';
+  }
 
-async function loadWithdrawals() {
-  const { data, error } = await supabase.from('withdrawals').select('*');
-  if (error) return document.getElementById('withdrawalsTable').innerText = 'Error: ' + error.message;
-  let html = '<table><tr><th>ID</th><th>Username</th><th>Amount</th><th>Phone</th><th>Status</th></tr>';
-  if(data.length === 0) html += '<tr><td colspan="5">No withdrawals yet</td></tr>';
-  data.forEach(w => html += `<tr><td>${w.id}</td><td>${w.username}</td><td>${w.amount}</td><td>${w.phone}</td><td>${w.status}</td></tr>`);
-  document.getElementById('withdrawalsTable').innerHTML = html + '</table>';
+  async function loadWithdrawals() {
+    const { data, error } = await supabase.from('withdrawals').select('*');
+    if (error) return document.getElementById('withdrawalsTable').innerText = 'Error: ' + error.message;
+    let html = '<table><tr><th>ID</th><th>Username</th><th>Amount</th><th>Phone</th><th>Status</th></tr>';
+    if(data.length === 0) html += '<tr><td colspan="5">No withdrawals yet</td></tr>';
+    data.forEach(w => html += `<tr><td>${w.id}</td><td>${w.username}</td><td>${w.amount}</td><td>${w.phone}</td><td>${w.status}</td></tr>`);
+    document.getElementById('withdrawalsTable').innerHTML = html + '</table>';
+  }
+} catch (e) {
+  document.getElementById('error').innerText = 'JS Error: ' + e.message;
 }
 </script>
 </body>
