@@ -192,6 +192,15 @@ button{
     color:white;
     margin-top:10px;
 }
+    .logout-btn {
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
 </style>
 </head>
 <body>
@@ -360,11 +369,14 @@ button{
                     Withdraw Now
                 </button>
             </div>
-
+            
             <div class="card">
                 <h3>Transaction History</h3>
                 <div id="historyList"></div>
             </div>
+            <button onclick="logoutUser()" class="logout-btn">
+    Logout
+</button>
 
         </div>
 
@@ -851,7 +863,15 @@ TRANSACTION HISTORY
         console.log(err);
     }
 }
+function logoutUser() {
+    localStorage.removeItem("velogrow_user");
+    localStorage.removeItem("velogrow_logged_in");
 
+    alert("Logged out successfully");
+
+    document.getElementById("dashboardPage").style.display = "none";
+    document.getElementById("loginPage").style.display = "block";
+}
 /*
 ==================================================
 AUTO LOGIN
