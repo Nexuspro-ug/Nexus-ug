@@ -459,12 +459,16 @@ function copyReferralLink() {
         return;
     }
 
-    const text = "My VeloGrow referral code: " + user.referral_code;
+    const referralLink =
+        window.location.origin +
+        window.location.pathname +
+        "?ref=" +
+        user.referral_code;
 
-    navigator.clipboard.writeText(text);
-    alert("Referral code copied!");
+    navigator.clipboard.writeText(referralLink);
+
+    alert("Referral link copied successfully!");
 }
-
 /*
 ==================================================
 REGISTER USER
