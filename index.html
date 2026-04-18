@@ -515,31 +515,7 @@ REGISTER USER
 ==================================================
 */
 
-async function registerUser() {
-    const phone = document.getElementById("phone").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const invitedBy = document.getElementById("referral").value.trim();
 
-    if (!phone || !password) {
-        alert("Please enter phone and password");
-        return;
-    }
-
-    try {
-        const { data: existingUser, error: findError } = await client
-            .from("members")
-            .select("*")
-            .eq("phone", phone)
-            .maybeSingle();
-
-        if (findError) {
-            console.log(findError);
-        }
-
-        if (existingUser) {
-            alert("Phone number already registered");
-            return;
-        }
 
         const referralCode = generateReferralCode();
 
@@ -550,7 +526,69 @@ async function registerUser() {
             referral_code: referralCode,
             invited_by: invitedBy || null
         };
+    
+  async function registerUser() {
+    const phone = document.getElementById("phone").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const invitedBy = document.getElementById("referral").value.trim();
 
+    if (!phone || !password) {
+        alert("Please enter phone and password");
+        return;
+    }
+
+    try {
+        const { data: existingUser, error: checkError } = await client
+            .from("profiles") // change to members if using members
+            .select("*")
+            .eq("phone", phone)
+            .maybeSingle();
+
+        if (checkError) {
+            alert("Check Error: " + checkError.message);
+            console.log(checkError);
+            return;
+        }
+
+        if (existingUser) {
+            alert("Phone number already registered");
+            return;
+        }
+
+        const referralCode = "VG" + Math.floor(Math.random() * 999999);
+
+        const newUser = {
+            phone: phone,
+            password: password,
+            balance: 4000,
+            referral_code: referralCode,
+            invited_by: invitedBy || null
+        };
+
+        const { data, error } = await client
+            .from("profiles") // change to members if using members
+            .insert([newUser])
+            .select();
+
+        if (error) {
+            alert("Insert Error: " + error.message);
+            console.log(error);
+            return;
+        }
+
+        localStorage.setItem(
+            "velogrow_user",
+            JSON.stringify(data[0])
+        );
+
+        alert("Registration successful! Welcome bonus added.");
+        showApp();
+
+    } catch (err) {
+        console.log(err);
+        alert("Real Error: " + err.message);
+    }
+}
         const { data, error } = await client
             .from("members")
              insert([newUser])
