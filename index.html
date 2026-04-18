@@ -509,25 +509,16 @@ function copyReferralLink() {
 
     alert("Referral link copied successfully!");
 }
+<!-- REPLACE ONLY YOUR BROKEN REGISTER + LOGIN SECTION WITH THIS CLEAN VERSION -->
+
+<script>
 /*
 ==================================================
-REGISTER USER
+REGISTER USER (FIXED)
 ==================================================
 */
 
-
-
-        const referralCode = generateReferralCode();
-
-        const newUser = {
-            phone: phone,
-            password: password,
-            balance: 4000,
-            referral_code: referralCode,
-            invited_by: invitedBy || null
-        };
-    
-  async function registerUser() {
+async function registerUser() {
     const phone = document.getElementById("phone").value.trim();
     const password = document.getElementById("password").value.trim();
     const invitedBy = document.getElementById("referral").value.trim();
@@ -538,15 +529,16 @@ REGISTER USER
     }
 
     try {
+        /* CHECK IF USER ALREADY EXISTS */
         const { data: existingUser, error: checkError } = await client
-            .from("profiles") // change to members if using members
+            .from("members")
             .select("*")
             .eq("phone", phone)
             .maybeSingle();
 
         if (checkError) {
-            alert("Check Error: " + checkError.message);
             console.log(checkError);
+            alert("Error checking existing user");
             return;
         }
 
@@ -555,7 +547,8 @@ REGISTER USER
             return;
         }
 
-        const referralCode = "VG" + Math.floor(Math.random() * 999999);
+        /* CREATE NEW USER */
+        const referralCode = generateReferralCode();
 
         const newUser = {
             phone: phone,
@@ -566,40 +559,17 @@ REGISTER USER
         };
 
         const { data, error } = await client
-            .from("profiles") // change to members if using members
+            .from("members")
             .insert([newUser])
             .select();
 
         if (error) {
-            alert("Insert Error: " + error.message);
             console.log(error);
+            alert("Registration failed. Check Supabase table.");
             return;
         }
 
-        localStorage.setItem(
-            "velogrow_user",
-            JSON.stringify(data[0])
-        );
-
-        alert("Registration successful! Welcome bonus added.");
-        showApp();
-
-    } catch (err) {
-        console.log(err);
-        alert("Real Error: " + err.message);
-    }
-}
-        const { data, error } = await client
-            .from("members")
-             insert([newUser])
-            .select();
-
-        if (error) {
-            console.log(error);
-            alert("Registration failed. Check your Supabase table.");
-            return;
-        }
-
+        /* SAVE LOGIN SESSION */
         saveCurrentUser(data[0]);
 
         alert("Registration successful! Welcome bonus of UGX 4,000 added.");
@@ -607,16 +577,18 @@ REGISTER USER
 
     } catch (err) {
         console.log(err);
-        alert("Something went wrong.");
+        alert("Something went wrong during registration.");
     }
 }
 
+
 /*
 ==================================================
-LOGIN USER
+LOGIN USER (FIXED)
 ==================================================
 */
-  async function loginUser() {
+
+async function loginUser() {
     const phone = document.getElementById("phone").value.trim();
     const password = document.getElementById("password").value.trim();
 
@@ -628,7 +600,7 @@ LOGIN USER
     try {
         const { data, error } = await client
             .from("members")
-            select("*")
+            .select("*")
             .eq("phone", phone)
             .eq("password", password)
             .maybeSingle();
@@ -645,15 +617,16 @@ LOGIN USER
         }
 
         saveCurrentUser(data);
+
         alert("Login successful");
         showApp();
 
     } catch (err) {
         console.log(err);
-        alert("Something went wrong");
+        alert("Something went wrong during login");
     }
 }
-
+</script>
 /*
 ==================================================
 LOAD DASHBOARD
