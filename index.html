@@ -488,7 +488,7 @@ async function registerUser() {
 
     try {
         const { data: existingUser, error: findError } = await client
-            .from("profiles")
+            .from("members")
             .select("*")
             .eq("phone", phone)
             .maybeSingle();
@@ -513,8 +513,8 @@ async function registerUser() {
         };
 
         const { data, error } = await client
-            .from("profiles")
-            .insert([newUser])
+            .from("members")
+             insert([newUser])
             .select();
 
         if (error) {
@@ -550,8 +550,8 @@ LOGIN USER
 
     try {
         const { data, error } = await client
-            .from("profiles")
-            .select("*")
+            .from("members")
+            select("*")
             .eq("phone", phone)
             .eq("password", password)
             .maybeSingle();
