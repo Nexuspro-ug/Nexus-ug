@@ -596,10 +596,15 @@ async function loadDashboard() {
 
     document.getElementById("walletBalance").innerText =
         formatUGX(user.balance || 0);
+const referralLink =
+    window.location.origin +
+    window.location.pathname +
+    "?ref=" +
+    user.referral_code;
 
-    document.getElementById("myReferralCode").innerText =
-        user.referral_code || "N/A";
-
+document.getElementById("myReferralCode").innerText =
+    referralLink;
+    
     loadTransactions();
 }
 
