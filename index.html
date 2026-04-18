@@ -528,10 +528,10 @@ async function registerUser() {
 
     try {
         const { data: existingUser, error: checkError } = await client
-            .from("members")
-            .select("*")
-            .eq("phone", phone)
-            .maybeSingle();
+    .from("members")
+    .select("*")
+    .eq("phone", phone)
+    .maybeSingle();
 
         if (checkError) {
             console.log(checkError);
