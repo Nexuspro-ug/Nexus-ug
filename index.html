@@ -509,7 +509,7 @@ function copyReferralLink() {
 
     alert("Referral link copied successfully!");
 }
-<script>
+
 /*
 ==================================================
 REGISTER USER (FIXED)
@@ -527,7 +527,6 @@ async function registerUser() {
     }
 
     try {
-        /* CHECK IF USER ALREADY EXISTS */
         const { data: existingUser, error: checkError } = await client
             .from("members")
             .select("*")
@@ -545,7 +544,6 @@ async function registerUser() {
             return;
         }
 
-        /* CREATE NEW USER */
         const referralCode = generateReferralCode();
 
         const newUser = {
@@ -567,19 +565,61 @@ async function registerUser() {
             return;
         }
 
-        /* SAVE LOGIN SESSION */
         saveCurrentUser(data[0]);
 
-        alert("Registration successful! Welcome bonus of UGX 4,000 added.");
+        alert("Registration successful! Welcome bonus added.");
         showApp();
 
     } catch (err) {
         console.log(err);
-        alert("Something went wrong during registration.");
+        alert("Registration error");
     }
 }
 
+/*
+==================================================
+LOGIN USER (FIXED)
+==================================================
+*/
 
+async function loginUser() {
+    const phone = document.getElementById("phone").value.trim();
+    const password = document.getElementById("password").value.trim();
+
+    if (!phone || !password) {
+        alert("Please enter phone and password");
+        return;
+    }
+
+    try {
+        const { data, error } = await client
+            .from("members")
+            .select("*")
+            .eq("phone", phone)
+            .eq("password", password)
+            .maybeSingle();
+
+        if (error) {
+            console.log(error);
+            alert("Login failed");
+            return;
+        }
+
+        if (!data) {
+            alert("Wrong phone number or password");
+            return;
+        }
+
+        saveCurrentUser(data);
+
+        alert("Login successful");
+        showApp();
+
+    } catch (err) {
+        console.log(err);
+        alert("Login error");
+    }
+}
 /*
 ==================================================
 LOGIN USER (FIXED)
@@ -706,7 +746,7 @@ async function investNow(amount) {
         const newBalance = (user.balance || 0) - amount;
 
         const { error: updateError } = await client
-            .from("profiles")
+            .from("members")
             .update({
                 balance: newBalance
             })
